@@ -1,0 +1,10 @@
+{
+  "name": "building58-games",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test test/",
+    "conformance": "node kit/conformance.js"
+  }
+}

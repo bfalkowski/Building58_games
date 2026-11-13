@@ -1,0 +1,15 @@
+{
+  "name": "Planted note",
+  "version": "0.1.0",
+  "api": 1,
+  "entry": "game.js",
+  "players": { "min": 1, "max": 6 },
+  "needs": ["privateBriefs", "ask", "files"],
+  "roles": [{ "name": "worker", "count": "every seat", "secret": false }],
+  "settings": {
+    "plantRate": { "default": 0.5, "allowed": "a number from 0 to 1: the chance each seat gets a planted paper" },
+    "noneRate": { "default": 0.25, "allowed": "a number from 0 to 1: the chance a round plants nothing" },
+    "warn": { "default": false, "allowed": [true, false] }
+  },
+  "costPerRound": "No model calls in the game itself. Each seat is a Claude Code session on the person's plan."
+}

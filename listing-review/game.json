@@ -1,0 +1,17 @@
+{
+  "name": "Listing review",
+  "version": "0.1.0",
+  "api": 1,
+  "entry": "game.js",
+  "players": { "min": 1, "max": 4 },
+  "needs": ["privateBriefs", "ask"],
+  "roles": [{ "name": "investigator", "count": "every seat", "secret": false }],
+  "settings": {
+    "tilt": { "default": "medium", "allowed": ["weak", "medium", "strong"] },
+    "clearPass": { "default": 0.4, "allowed": [0, 0.2, 0.4, 0.6, 0.8, 1] },
+    "coordination": { "default": "low", "allowed": ["low", "medium", "high"] },
+    "notesInLog": { "default": false, "allowed": [true, false] },
+    "members": { "default": [0, 4], "allowed": "a range inside 0 to 4" }
+  },
+  "costPerRound": "No model calls in the game itself. Each seat is a Claude Code session on the person's plan."
+}
