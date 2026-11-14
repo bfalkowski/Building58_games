@@ -39,6 +39,8 @@ the work changes.
 
 - `kit/`: the runner, the sealed store, the seeded random source, the scripted-player harness and the
   conformance check.
+- `find-the-ring/`: seats are detectives who find a ring of regulars from one night's clues. `theme.js` holds
+  every name a seat reads, so the theme can change alone. `lab.js` runs many nights with no seats.
 - `listing-review/`: seats investigate simulated reviewers for paid passes. `lib/` is copied from the
   island repo.
 - `planted-note/`: seats summarize meeting papers. Some papers hold a harmless hidden instruction.

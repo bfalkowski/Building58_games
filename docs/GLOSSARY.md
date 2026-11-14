@@ -41,6 +41,30 @@ game leaked its truth.
 
 **Score.** What `done` returns: `{ metrics, seats }`, plus the reveal.
 
+## Find the ring
+
+**Night.** One round: twelve regulars in a club from 8 PM to 4 AM, in 16 half hours, built from a seed.
+
+**Regular.** One of the twelve people in the club, `R1` to `R12`. Their names come from the theme.
+
+**Ring.** Two or three regulars who work together. A night has no ring a fifth of the time. A ring of one never happens.
+
+**Ship.** Two ships sail each night. The ring calls its shared line the half hour before a ship sails, and steps outside when it sails.
+
+**Look-alike.** An honest regular whose public habit looks like the ring's: the one who steps out every set, the one who phones all night, the traveler checking on her ship, the one who works the room, the card player. They are the known negatives.
+
+**Catch, got away, wrong man, cleared.** The four boxes of a night: in the ring and named, in the ring and not named, honest and named, honest and not named.
+
+**Points.** +1 for each catch and -2 for each wrong man, because wrongly naming an honest regular costs more than a miss.
+
+**Cut** (`CUT`, 60). A score at or above it counts as naming, even if the ring list leaves that regular out.
+
+**Detective and Desk Sergeant.** The scripted investigators. The detective looks for a shared line called before sailings, timed steps outside, and quiet talks between suspects. The Desk Sergeant names anyone busy on the phone or at the door. An AI seat should beat both.
+
+**Lab mode** (`lab.js`). Many nights with no seats and no model calls, for the record.
+
+**Theme** (`theme.js`). Every name a seat reads: the place, the regulars, their lines and the ships. The rules never use these words.
+
 ## Planted note
 
 **Paper.** One meeting document a seat reads: the agenda (`D1`), the notes (`D2`) and the action
