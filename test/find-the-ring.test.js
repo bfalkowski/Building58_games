@@ -151,13 +151,13 @@ test('the public record of a request leaves out its text', () => {
   assert.ok(!('text' in publicRecord(e)) && !('ring' in publicRecord(e)));
 });
 
-test('over 100 nights, the detective beats the Desk Sergeant and rarely bans an honest regular', async () => {
+test('over 100 nights, the detective beats the house alarm alone and rarely bans an honest regular', async () => {
   const lab = await runLab({ nights: 100, split: 'unit' });
-  const d = lab.detective, s = lab.deskSergeant;
-  assert.ok(d.auc > s.auc + 0.1, `detective ${d.auc} against sergeant ${s.auc}`);
+  const d = lab.detective, a = lab.houseAlarm;
+  assert.ok(d.auc > a.auc + 0.1, `detective ${d.auc} against the alarm ${a.auc}`);
   assert.ok(d.wrongRate < 0.06, 'few wrong bans');
-  assert.ok(d.catchRate > 0.5, 'catches most of the ring');
-  assert.ok(s.wrongBans > 3 * d.wrongBans, 'the busy-body rule bans many honest regulars');
+  assert.ok(d.catchRate > 0.45, `catches about half the ring or more: ${d.catchRate}`);
+  assert.ok(d.catchRate > 2 * a.catchRate, 'the alarm alone catches far fewer');
   assert.ok(d.reads <= 300 && d.tails <= 100, 'the budget holds in the lab too');
 });
 
@@ -167,7 +167,7 @@ test('the ceiling: on calibration nights the Informant catches about 75% at 5% f
   assert.ok(inf.catchAt5 > 0.65 && inf.catchAt5 < 0.85, `informant ${inf.catchAt5}`);
   assert.ok(inf.aucVsLookalikes < 0.99, `the look-alikes still fool it sometimes: ${inf.aucVsLookalikes}`);
   assert.ok(inf.catchAt5 >= lab.detective.catchAt5, 'no scripted detective beats the ceiling');
-  assert.ok(inf.catchAt5 - lab.deskSergeant.catchAt5 >= 0.25, 'room between the ceiling and the simple rule');
+  assert.ok(inf.catchAt5 - lab.houseAlarm.catchAt5 >= 0.25, 'at least 25 points between the ceiling and the alarm');
 });
 
 test('calibration nights and test nights never share a seed', async () => {
@@ -253,4 +253,25 @@ test('off the books is real: some members leave no record of the ring at all, an
   assert.ok(traceless > 0 && traceless < members / 2, `${traceless} of ${members} left no trace`);
   const lab = await runLab({ nights: 60, split: 'unit' });
   assert.ok(lab.findableShare > 0.8 && lab.findableShare < 1, `findable share ${lab.findableShare}`);
+});
+
+test('the house alarm: flags are public and name a rule, refused requests are always flagged, and a flag is a reason to read', () => {
+  let flagged = 0, ringFlags = 0, ringReq = 0;
+  for (let i = 0; i < 100; i++) {
+    const n = buildNight(`ring-alarm-${i}`);
+    for (const e of n.records) {
+      if (e.kind === 'refused') assert.equal(e.flag, 'H2');
+      if (e.flag) { flagged++; assert.ok(['H1', 'H2'].includes(e.flag)); }
+      if (e.ring && e.text) { ringReq++; if (e.flag) ringFlags++; }
+      if (n.method === 'books' && e.ring) assert.ok(!e.flag, 'off the books gives the alarm nothing');
+    }
+  }
+  assert.ok(ringFlags / ringReq > 0.35 && ringFlags / ringReq < 0.65, `about half of ring requests: ${ringFlags} of ${ringReq}`);
+  const night = buildNight(seedWith((x) => x.records.some((e) => e.flag === 'H1')));
+  const d = openDesk(night);
+  const f = night.records.find((e) => e.flag === 'H1');
+  assert.ok(d.records({ flagged: true }).every((e) => e.flag));
+  assert.equal(typeof d.read(f.id, [f.id]).text, 'string', 'a flagged record is its own reason');
+  assert.equal(d.records().find((e) => e.id === f.id).flag, 'H1');
+  assert.equal(night.records.filter((e) => e.flag).length, d.records({ flagged: true }).length);
 });

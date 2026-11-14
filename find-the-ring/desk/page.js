@@ -7,7 +7,7 @@ import * as theme from '../theme.js';
 import { buildNight, IDS, HALF_HOURS, clock } from '../night.js';
 import { openDesk } from '../desk.js';
 import { scoreAnswer, tally } from '../score.js';
-import { detective, informant } from '../investigators.js';
+import { detective, informant, houseAlarm } from '../investigators.js';
 import { LOOKALIKES } from '../rules.js';
 
 const $ = (id) => document.getElementById(id);
@@ -22,7 +22,7 @@ const TICK = 2.4;  // seconds a half hour, at 1x
 // also play, so a person's night can be compared with theirs.
 const PEOPLE = Array.from({ length: 20 }, (_, i) => `test-${i * 10}`);
 const CASES = [
-  { key: 'learn-1', label: 'Learning case 1: the shared line, no tail', seed: 'learn-1', night: { ring: [2, 3], methods: ['line'] }, desk: { tails: 0 } },
+  { key: 'learn-1', label: 'Learning case 1: the shared line, no tail', seed: 'learn-1', night: { ring: [2, 3], methods: ['line'] }, desk: { tails: 0 }, alarm: false },
   { key: 'learn-2', label: 'Learning case 2: both methods, no tail', seed: 'learn-2', night: { ring: [2, 3] }, desk: { tails: 0 } },
   { key: 'learn-3', label: 'Learning case 3: the full desk', seed: 'learn-3', night: {}, desk: {} },
   ...PEOPLE.map((seed, i) => ({ key: seed, label: `People set, night ${i + 1} of 20`, seed, night: {}, desk: {}, people: true })),
@@ -50,22 +50,23 @@ function lineOf(e) {
   if (e.kind === 'sit') return `${N(e.who)} sat with ${N(e.with)}`;
   return `${N(e.who)} played cards${e.pot === 'big' ? ', took a big pot' : ''}`;
 }
-const TABS = [['all', 'All'], ['machine', `The ${M}`], ['calls', 'Call records'], ['door', 'Door book'], ['floor', 'The floor']];
+const TABS = [['all', 'All'], ['machine', `The ${M}`], ['calls', 'Call records'], ['door', 'Door book'], ['floor', 'The floor'], ['alarm', 'Alarm ⚑']];
+const alarmOn = () => S.case.alarm !== false;
 
-// A read needs a reason: a pin, on someone in the record, other than this record.
-const reasonFor = (e) => [...new Set(involved(e).flatMap(pinsOf))].filter((x) => x !== e.id);
+// A read needs a reason: an alarm flag on the record, or a pin on someone in it.
+const reasonFor = (e) => [...(e.flag && alarmOn() ? [e.id] : []), ...new Set(involved(e).flatMap(pinsOf))].filter((x, i, l) => l.indexOf(x) === i && (x !== e.id || (e.flag && alarmOn())));
 const canRead = (e) => e.text !== false && !S.texts[e.id] && budget().reads > 0 && reasonFor(e).length > 0 && !S.handed;
 
 function renderTape() {
   const rows = [];
   for (let h = upto() - 1; h >= 0; h--) {
     for (const e of S.records.filter((x) => x.half === h).reverse()) {
-      if (S.filter !== 'all' && e.book !== S.filter) continue;
+      if (S.filter === 'alarm' ? !(e.flag && alarmOn()) : S.filter !== 'all' && e.book !== S.filter) continue;
       const readable = ['call', 'msg', 'look', 'note', 'refused'].includes(e.kind);
       const trip = S.tail?.trips.find((t) => t.record === e.id);
       const said = S.texts[e.id];
-      const why = reasonFor(e).length ? 'Open the full text' : 'Needs a reason: pin a clue on someone in it first';
-      rows.push(`<div class="rec"><span class="t">${e.time}</span><span><span class="src">${srcLabel(e)} · ${e.id}</span>${lineOf(e)}${said ? `<span class="said">${said}</span>` : ''}${trip ? `<span class="dest">Doorman: went to ${trip.went}.</span>` : ''}</span>
+      const why = reasonFor(e).length ? 'Open the full text' : 'Needs a reason: an alarm flag, or a pinned clue on someone in it';
+      rows.push(`<div class="rec"><span class="t">${e.time}</span><span><span class="src">${srcLabel(e)} · ${e.id}${e.flag && alarmOn() ? `<span class="flag">⚑ ${e.flag}</span>` : ''}</span>${lineOf(e)}${said ? `<span class="said">${said}</span>` : ''}${trip ? `<span class="dest">Doorman: went to ${trip.went}.</span>` : ''}</span>
         <span class="acts">${readable && !said ? `<button type="button" data-read="${e.id}" ${canRead(e) ? '' : 'disabled'} title="${why}">Read</button>` : ''}<button type="button" data-pin="${e.id}" aria-pressed="${isPinned(e)}" ${S.handed ? 'disabled' : ''}>${isPinned(e) ? 'Pinned' : 'Pin'}</button></span></div>`);
     }
     const ship = S.night.ships.find((s) => s.at === h);
@@ -164,7 +165,7 @@ async function showPaper() {
   else { head = `${R} Broken, Honest Patron Banned`; deck = `${list(t.caught)} banned. ${list(t.wrongMen)} banned by mistake.${t.gotAway.length ? ` ${list(t.gotAway)} got away.` : ''}`; }
   const photo = (id, st, red) => `<div class="photo"><div class="pic">${FIG}${red ? '<i></i>' : ''}<span class="st">${st}</span></div><b>${N(id)}</b><span>${theme.regulars[IDS.indexOf(id)].role}</span></div>`;
   const photos = [...t.caught.map((id) => photo(id, 'CAUGHT', 1)), ...t.gotAway.map((id) => photo(id, 'AT LARGE', 1)), ...t.wrongMen.map((id) => photo(id, 'WRONG BAN', 0))].join('');
-  const [det, inf] = [await other(detective), await other(informant)];
+  const [det, inf, alarm] = [await other(detective), await other(informant), await other(houseAlarm)];
   const pinnedAll = new Set(Object.values(S.pins).flat());
   const missed = n.records.filter((e) => e.ring && !pinnedAll.has(e.id)).slice(0, 6);
   const line = (who, x) => `${who} would ban ${x.bans.length ? list(x.bans) : 'nobody'}: ${x.s.caught} caught, ${x.s.wrongBans} wrong. Score ${x.s.points}.`;
@@ -184,6 +185,7 @@ async function showPaper() {
         <li>Privacy: ${sc.privacyReads} of ${sc.reads} content reads were on honest regulars.</li>
         <li>Tail: ${S.tail ? `${N(S.tail.regular)}${n.ring.includes(S.tail.regular) ? `, a ${names.member}` : ', honest'}` : 'not used'}.</li></ul></div>
       <div><h4>The other detectives, same night</h4><ul>
+        <li>${line('The house alarm alone', alarm)}</li>
         <li>${line('The scripted detective', det)}</li>
         <li>${line('The Informant, who knew tonight\'s method,', inf)}</li></ul></div>
     </div>
@@ -212,6 +214,8 @@ function openCase(c) {
   const desk = openDesk(night, { names, ...c.desk });
   Object.assign(S, { case: c, seed, night, desk, records: desk.records(), texts: {}, tail: null, pins: {}, bans: {}, scores: Object.fromEntries(IDS.map((id) => [id, 0])), half: 0, frac: 0, playing: false, ended: false, handed: false, filter: S.filter ?? 'all', speed: S.speed ?? 1 });
   $('caseno').textContent = c.label; $('casepick').value = c.key;
+  for (const b of $('tabs').children ?? []) if (b.dataset?.k === 'alarm') b.hidden = c.alarm === false;
+  if (c.alarm === false && S.filter === 'alarm') S.filter = 'all';
   $('press').hidden = true; $('start').hidden = false;
   renderAll();
 }

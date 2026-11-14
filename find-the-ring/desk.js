@@ -32,7 +32,8 @@ export function openDesk(night, { names = theme.names, reads = BUDGET.reads, tai
   const cites = (because, not) => {
     const list = Array.isArray(because) ? [...new Set(because.map(String))] : because == null ? [] : [String(because)];
     if (!list.length) throw new Refused('cite at least one record id as the reason, such as ["E12"]');
-    const bad = list.find((x) => !byId.has(x) || x === not);
+    // A flagged record is its own reason: the alarm already pointed at it.
+    const bad = list.find((x) => !byId.has(x) || (x === not && !byId.get(x).flag));
     if (bad) throw new Refused(bad === not ? 'a record cannot be its own reason' : `there is no record ${bad}`);
     return list;
   };
@@ -66,11 +67,11 @@ export function openDesk(night, { names = theme.names, reads = BUDGET.reads, tai
         budget: { reads: reads - used.reads.length, tails: tails - used.tails.length },
       };
     },
-    records({ book, regular: who, from, to } = {}) {
+    records({ book, regular: who, from, to, flagged } = {}) {
       if (book != null && !BOOKS.includes(book)) throw new Refused(`a book is one of ${BOOKS.join(', ')}`);
       const id = who == null ? null : regular(who);
       return night.records
-        .filter((e) => (!book || e.book === book) && (!id || e.who === id || e.to === id || e.with === id) && (from == null || e.half >= from) && (to == null || e.half <= to))
+        .filter((e) => (!flagged || e.flag) && (!book || e.book === book) && (!id || e.who === id || e.to === id || e.with === id) && (from == null || e.half >= from) && (to == null || e.half <= to))
         .map(show);
     },
     read(recordId, because) {
