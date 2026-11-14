@@ -58,6 +58,8 @@ export const words = {
   lookOwn: ['"When does {ship} sail? Is it on time?"', '"Has {ship} posted its time yet?"'],
   harborCall: ['"Is {ship} still on time tonight?"'],
   note: ['"Remind me: flowers for Ma."', '"Pay Lou for the tab."', '"Call the tailor Monday."'],
+  // Honest lines that read like the ring's. They make a content read a judgment, not a proof.
+  oddHonest: ['"After the show. The usual place?"', '"Same as last time: the corner booth."', '"Meet me by the cabs when the horn goes."'],
   askAbout: ['"Who did {name} call tonight?"', '"Who has {name} been sending messages to?"'],
 };
 

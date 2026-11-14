@@ -6,12 +6,12 @@
 import { writeFileSync } from 'node:fs';
 import { buildNight, IDS, METHODS } from './night.js';
 import { openDesk } from './desk.js';
-import { detective, deskSergeant } from './investigators.js';
+import { detective, deskSergeant, informant } from './investigators.js';
 import { scoreAnswer, auc, catchAt5 } from './score.js';
 import { LOOKALIKES } from './rules.js';
 import * as theme from './theme.js';
 
-export const DETECTIVES = { detective, deskSergeant };
+export const DETECTIVES = { informant, detective, deskSergeant };
 
 // Calibration nights and test nights never share a seed.
 export const nightSeed = (split, i) => `${split}-${i}`;
@@ -32,7 +32,7 @@ export async function runLab({ nights = 200, split = 'test', detectives = DETECT
     const night = buildNight(seed, build);
     for (const [k, work] of Object.entries(detectives)) {
       const desk = openDesk(night);
-      await work(desk, { night });
+      await work(desk, { night, seed });
       const answer = desk.answer();
       const s = scoreAnswer(night, answer, LOOKALIKES), a = res[k];
       for (const f of ['caught', 'gotAway', 'wrongBans', 'cleared', 'points', 'goodEvidence', 'weakEvidence', 'reads', 'privacyReads', 'tails']) a[f] += s[f];
