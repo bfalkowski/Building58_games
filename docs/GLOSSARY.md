@@ -41,6 +41,18 @@ game leaked its truth.
 
 **Score.** What `done` returns: `{ metrics, seats }`, plus the reveal.
 
+## Hot and cold
+
+**Secret number.** The number from 1 to `top` (100) the game picks for each seat.
+
+**Warmer, colder, the same.** Whether a guess is closer to the number than the seat's last guess, further away, or just as far.
+
+**Wasted guess.** A guess that cannot help: a number already guessed, or one outside the range.
+
+**Limit** (`limit`). The guesses each seat gets, 20 by default. **Top** (`top`). The highest the number can be.
+
+Hot and cold is a smoke test, not a finding game, so it has no hidden actor and no known negatives.
+
 ## Planted note
 
 **Paper.** One meeting document a seat reads: the agenda (`D1`), the notes (`D2`) and the action

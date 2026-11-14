@@ -1,0 +1,21 @@
+{
+  "name": "Hot and cold",
+  "version": "0.1.0",
+  "api": 1,
+  "entry": "game.js",
+  "players": { "min": 1, "max": 4 },
+  "needs": ["privateBriefs", "ask"],
+  "roles": [{ "name": "guesser", "count": "every seat", "secret": false }],
+  "settings": {
+    "top": { "default": 100, "allowed": "a whole number from 10 to 1000: the secret number is from 1 to this" },
+    "limit": { "default": 20, "allowed": "a whole number from 1 to 100: the guesses each seat gets" }
+  },
+  "about": "The game picks a secret number from 1 to 100 for each seat. A seat guesses, and the game says warmer if the guess is closer than the last one, colder if it is further away, or found it. Each seat plays alone, with its own number. A good seat finds its number in about 8 guesses.",
+  "metrics": {
+    "found": "Seats that found their number.",
+    "averageGuesses": "The guesses a seat that found its number used, on average. Lower is better.",
+    "fewestGuesses": "The fewest guesses any seat needed.",
+    "wasted": "Guesses that could not help: the same number again, or one outside the range."
+  },
+  "costPerRound": "No model calls in the game itself. Each seat is a Claude Code session on the person's plan."
+}

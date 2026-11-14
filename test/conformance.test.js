@@ -7,7 +7,7 @@ import { conform, gameFolders, ROOT } from '../kit/conformance.js';
 const games = gameFolders();
 
 test('the repo has the version 1 games', () => {
-  assert.deepEqual(games.map((d) => relative(ROOT, d)), ['listing-review', 'planted-note']);
+  assert.deepEqual(games.map((d) => relative(ROOT, d)), ['hot-and-cold', 'listing-review', 'planted-note']);
 });
 
 for (const dir of games) {
