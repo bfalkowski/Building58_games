@@ -20,7 +20,7 @@ export function briefFor(seat, names = theme.names) {
     `You are seat ${seat}, a detective in a round of Find the ring. Everything in it is made up.`,
     '',
     `The place is ${theme.placeOf(names.club)}. Twelve regulars, R1 to R12, spend one night there, from 8 PM to 4 AM. Two ships sail during the night.`,
-    `Some regulars may be in a smuggling ring that calls itself ${names.ring}: two or three people who work together. A night can have no ring at all.`,
+    `Some regulars may be ${theme.plural(names.member)}: a ring that calls itself ${names.ring}, two or three people who work together to move ${theme.cargo}. A night can have no ring at all.`,
     'Some honest regulars have habits that look suspicious. Judge what regulars did, never who they are.',
     '',
     'Your job: give every regular a score from 0 to 100, the chance in percent that they are in the ring. Then name the ring, or an empty list if you think there is none.',

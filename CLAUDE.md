@@ -41,7 +41,7 @@ the work changes.
   conformance check.
 - `find-the-ring/`: seats are detectives who find a ring of regulars from one night's clues. `theme.js` holds
   every name a seat reads, so the theme can change alone. The club's and the ring's names are round
-  settings (`clubName`, `ringName`), with defaults in `theme.js`. `lab.js` runs many nights with no seats.
+  settings (`clubName`, `ringName`, `memberName`), with defaults in `theme.js`. `lab.js` runs many nights with no seats.
 - `listing-review/`: seats investigate simulated reviewers for paid passes. `lib/` is copied from the
   island repo.
 - `planted-note/`: seats summarize meeting papers. Some papers hold a harmless hidden instruction.
