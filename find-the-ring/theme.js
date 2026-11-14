@@ -2,9 +2,13 @@
 // take a new theme by changing this file alone. Today's theme is a nightclub in a made-up port city,
 // 1948. Every name is made up.
 
-export const title = 'The Blue Lantern';
-export const place = 'the Blue Lantern, a nightclub in a made-up port city, in 1948';
-export const groupWord = 'smuggling ring';
+// The names a round can change with its settings: what the club is called, and what the ring calls
+// itself. These are only the defaults. Nothing else in the game reads a name from here.
+export const names = {
+  club: 'the Blue Lantern',
+  ring: 'the Tube Runners Social Club',
+};
+export const placeOf = (club) => `${club}, a nightclub in a made-up port city, in 1948`;
 
 // The shared line the ring uses, and the harbor master's line that one honest regular calls.
 export const ringLine = 'Harbor 4-117';

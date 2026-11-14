@@ -15,12 +15,12 @@ export { CUT };
 // The regulars with an honest habit that looks like the ring's.
 export const LOOKALIKES = IDS.filter((_, i) => theme.regulars[i].habit);
 
-export function briefFor(seat) {
+export function briefFor(seat, names = theme.names) {
   return [
     `You are seat ${seat}, a detective in a round of Find the ring. Everything in it is made up.`,
     '',
-    `The place is ${theme.place}. Twelve regulars, R1 to R12, spend one night there, from 8 PM to 4 AM. Two ships sail during the night.`,
-    `Some regulars may be in a ${theme.groupWord}: two or three people who work together. A night can have no ring at all.`,
+    `The place is ${theme.placeOf(names.club)}. Twelve regulars, R1 to R12, spend one night there, from 8 PM to 4 AM. Two ships sail during the night.`,
+    `Some regulars may be in a smuggling ring that calls itself ${names.ring}: two or three people who work together. A night can have no ring at all.`,
     'Some honest regulars have habits that look suspicious. Judge what regulars did, never who they are.',
     '',
     'Your job: give every regular a score from 0 to 100, the chance in percent that they are in the ring. Then name the ring, or an empty list if you think there is none.',
@@ -49,12 +49,28 @@ function range(settings) {
   return r;
 }
 
+// A name setting is a short line of plain text. Leaving it out keeps the theme's default.
+const NAME_TEXT = /^[A-Za-z0-9][A-Za-z0-9 .,'&-]{0,59}$/;
+export function namesFrom(settings) {
+  const out = { ...theme.names };
+  for (const key of Object.keys(out)) {
+    const v = settings[`${key}Name`];
+    if (v == null) continue;
+    if (typeof v !== 'string' || !NAME_TEXT.test(v.trim())) {
+      throw new Error(`the ${key}Name setting is plain text of 1 to 60 letters, digits, spaces and . , ' & -`);
+    }
+    out[key] = v.trim();
+  }
+  return out;
+}
+
 export function setup({ seed, settings, seats }) {
+  const names = namesFrom(settings);
   const night = buildNight(seed, { ring: range(settings) });
   const view = { ships: night.ships, events: night.events };
   return {
-    briefs: Object.fromEntries(seats.map((s) => [s, briefFor(s)])),
-    state: { night, view, answers: Object.fromEntries(seats.map((s) => [s, null])) },
+    briefs: Object.fromEntries(seats.map((s) => [s, briefFor(s, names)])),
+    state: { night, view, names, answers: Object.fromEntries(seats.map((s) => [s, null])) },
     truth: { inRing: night.ring, ships: night.ships },
     // A word only the truth has: its field name.
     words: ['"inRing":'],
@@ -82,7 +98,8 @@ export function action(state, { seat, kind, args }) {
   const { ships, events } = state.view;
   if (kind === 'summary') {
     return json({
-      place: theme.place,
+      place: theme.placeOf(state.names.club),
+      ring: state.names.ring,
       hours: `8:00 PM to 4:00 AM, in ${HALF_HOURS} half hours (half 0 is 8:00 PM)`,
       regulars: IDS.map((id, i) => ({ id, name: theme.regulars[i].name, role: theme.regulars[i].role, ...(theme.regulars[i].habit ? { knownHabit: theme.regulars[i].habit } : {}) })),
       ships: ships.map((s) => ({ name: s.name, sails: clock(s.at), half: s.at })),

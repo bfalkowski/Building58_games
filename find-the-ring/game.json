@@ -7,7 +7,9 @@
   "needs": ["privateBriefs", "ask"],
   "roles": [{ "name": "detective", "count": "every seat", "secret": false }],
   "settings": {
-    "ring": { "default": [0, 3], "allowed": "a range inside 0 to 3: how many regulars the ring can have. A ring of one never happens" }
+    "ring": { "default": [0, 3], "allowed": "a range inside 0 to 3: how many regulars the ring can have. A ring of one never happens" },
+    "clubName": { "default": "the Blue Lantern", "allowed": "plain text, 1 to 60 characters: what the club is called" },
+    "ringName": { "default": "the Tube Runners Social Club", "allowed": "plain text, 1 to 60 characters: what the ring calls itself" }
   },
   "about": "One night in a 1948 nightclub. Twelve regulars, two ships, and maybe a ring of two or three who work together. Each seat is a detective: it reads the phone log, the door book and who sat with whom, scores every regular from 0 to 100, and names the ring or nobody. Some honest regulars have habits that look like the ring's.",
   "metrics": {

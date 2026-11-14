@@ -97,3 +97,16 @@ test('over 100 nights, the detective beats the Desk Sergeant and rarely names an
   assert.ok(d.caught / (d.caught + d.gotAway) > 0.6, 'catches most of the ring');
   assert.ok(s.wrongMen > 3 * d.wrongMen, 'the busy-body rule names many honest regulars');
 });
+
+test('the club and the ring take their names from the settings, and a bad name gets a plain error', () => {
+  const plain = rules.setup({ seed: 'ring-names', settings: {}, seats: ['S1'] });
+  assert.match(plain.briefs.S1, /the Tube Runners Social Club/);
+  const named = rules.setup({ seed: 'ring-names', settings: { clubName: 'the Copper Kettle', ringName: 'the Tuesday Bridge Society' }, seats: ['S1'] });
+  assert.match(named.briefs.S1, /the Copper Kettle, a nightclub/);
+  assert.match(named.briefs.S1, /calls itself the Tuesday Bridge Society/);
+  const summary = JSON.parse(rules.action(named.state, { seat: 'S1', kind: 'summary', args: {} }));
+  assert.equal(summary.ring, 'the Tuesday Bridge Society');
+  assert.deepEqual(named.state.night, plain.state.night, 'a name never changes the night');
+  assert.throws(() => rules.setup({ seed: 'x', settings: { ringName: '' }, seats: ['S1'] }), /ringName setting/);
+  assert.throws(() => rules.setup({ seed: 'x', settings: { clubName: '<b>loud</b>' }, seats: ['S1'] }), /clubName setting/);
+});

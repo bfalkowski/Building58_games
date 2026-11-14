@@ -47,7 +47,7 @@ game leaked its truth.
 
 **Regular.** One of the twelve people in the club, `R1` to `R12`. Their names come from the theme.
 
-**Ring.** Two or three regulars who work together. A night has no ring a fifth of the time. A ring of one never happens.
+**Ring.** Two or three regulars who work together. The name the ring calls itself is a round setting (`ringName`), as is the club's name (`clubName`). A night has no ring a fifth of the time. A ring of one never happens.
 
 **Ship.** Two ships sail each night. The ring calls its shared line the half hour before a ship sails, and steps outside when it sails.
 
