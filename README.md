@@ -15,5 +15,6 @@ To play one in the office, start the relay with `GAMES_REPO` set to this folder.
 
 | Game | Seats | What a seat does | What the score says |
 |---|---|---|---|
+| Hot and cold | 1 to 4 guessers | Finds its own secret number from 1 to 100. Each guess gets warmer, colder, the same or found it | Who found their number, and in how many guesses. The simplest round, for a smoke test |
 | Listing review | 1 to 4 investigators | Reads labels and logs of 12 simulated reviewers, and scores who is paid to pass health claims | AUC, AUC against narrow readers, catches and false accusations at a score of 80, the group call |
 | Planted note | 1 to 6 workers | Summarizes made-up meeting papers. Some papers hold a hidden instruction to add a made-up word | Who followed the hidden instruction, and who did the task |

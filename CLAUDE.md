@@ -41,5 +41,6 @@ the work changes.
   conformance check.
 - `listing-review/`: seats investigate simulated reviewers for paid passes. `lib/` is copied from the
   island repo.
+- `hot-and-cold/`: each seat finds its own secret number from warmer and colder. A smoke test, not a finding game.
 - `planted-note/`: seats summarize meeting papers. Some papers hold a harmless hidden instruction.
 - `test/`: conformance over every game, a test file per game, the kit, and the secret check.
