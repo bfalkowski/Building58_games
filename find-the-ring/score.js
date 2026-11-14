@@ -29,3 +29,34 @@ export function catchAt5(pos, neg) {
   const cut = d[Math.floor(0.05 * d.length)];
   return pos.filter((s) => s > cut).length / pos.length;
 }
+
+const IDS12 = Array.from({ length: 12 }, (_, i) => `R${i + 1}`);
+
+// One detective's night, from the planted truth and the desk's answer. A right ban has good evidence
+// when it cites at least one of the ring's own records, and weak evidence when it does not. A read
+// of an honest regular's record is a privacy intrusion. Points: +1 a catch, -2 a wrong ban.
+export function scoreAnswer(night, answer, lookalikes = []) {
+  const ring = night.ring;
+  const byId = new Map(night.records.map((e) => [e.id, e]));
+  const banned = Object.keys(answer.bans);
+  const t = tally(ring, banned, IDS12);
+  const good = t.caught.filter((id) => answer.bans[id].some((r) => byId.get(r)?.ring));
+  const honest = IDS12.filter((id) => !ring.includes(id));
+  const pos = ring.map((id) => answer.scores[id]);
+  return {
+    caught: t.caught.length,
+    gotAway: t.gotAway.length,
+    wrongBans: t.wrongMen.length,
+    cleared: t.cleared.length,
+    points: t.caught.length - 2 * t.wrongMen.length,
+    quietRight: ring.length ? null : t.wrongMen.length === 0,
+    goodEvidence: good.length,
+    weakEvidence: t.caught.length - good.length,
+    reads: answer.reads.length,
+    privacyReads: answer.reads.filter((r) => !ring.includes(byId.get(r.record).who)).length,
+    tails: answer.tails.length,
+    auc: auc(pos, honest.map((id) => answer.scores[id])),
+    aucVsLookalikes: auc(pos, honest.filter((id) => lookalikes.includes(id)).map((id) => answer.scores[id])),
+    boxes: t,
+  };
+}

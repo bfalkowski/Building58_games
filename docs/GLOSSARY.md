@@ -47,23 +47,43 @@ game leaked its truth.
 
 **Regular.** One of the twelve people in the club, `R1` to `R12`. Their names come from the theme.
 
-**Ring.** Two or three regulars who work together. The name the ring calls itself is a round setting (`ringName`), as are the club's name (`clubName`) and the word for one member (`memberName`). A night has no ring a fifth of the time. A ring of one never happens.
+**House detective.** What each seat is. It works for the club and sees only the club's own records.
 
-**Ship.** Two ships sail each night. The ring calls its shared line the half hour before a ship sails, and steps outside when it sails.
+**The machine.** The club's automatic operator (the WAMAC in today's theme). A patron types a request, and it places a call, passes a message, looks up a sailing or keeps a note. It stands in for an AI assistant.
 
-**Look-alike.** An honest regular whose public habit looks like the ring's: the one who steps out every set, the one who phones all night, the traveler checking on her ship, the one who works the room, the card player. They are the known negatives.
+**Ring.** Two or three regulars who misuse the club's service together. The name the ring calls itself is a round setting (`ringName`), as are the club's name (`clubName`) and the word for one member (`memberName`). A night has no ring a fifth of the time. A ring of one never happens.
 
-**Catch, got away, wrong man, cleared.** The four boxes of a night: in the ring and named, in the ring and not named, honest and named, honest and not named.
+**Method.** How the ring works on one night. `line`: members call one shared line before a ship sails, and sit together. `relay`: members pass messages through the machine before a sailing, and never sit together.
 
-**Points.** +1 for each catch and -2 for each wrong man, because wrongly naming an honest regular costs more than a miss.
+**Ship.** Two ships sail each night. The ring's business clusters around the sailings.
 
-**Cut** (`CUT`, 60). A score at or above it counts as naming, even if the ring list leaves that regular out.
+**Record** (`E1`, `E2`, ...). One line in one of the house's four books: the machine's log, the call records, the door book and the floor. Its id stays the same for the seed. The free view of a record leaves out its text and where a regular went.
 
-**Detective and Desk Sergeant.** The scripted investigators. The detective looks for a shared line called before sailings, timed steps outside, and quiet talks between suspects. The Desk Sergeant names anyone busy on the phone or at the door. An AI seat should beat both.
+**Desk** (`desk.js`). One detective's night: the free records, the budgets, and the log of every play. The office, the lab and the browser page all use it.
 
-**Lab mode** (`lab.js`). Many nights with no seats and no model calls, for the record.
+**Content read** (`read`). Opens the full text of one request or call. Three a night by default (`reads`), and each cites the record that made the detective look.
 
-**Theme** (`theme.js`). Every name a seat reads: the place, the regulars, their lines and the ships. The rules never use these words.
+**Tail** (`tail`). The doorman follows one regular and reports where they went each time they stepped out. One a night by default (`tails`).
+
+**Ban** (`ban`). Bans a regular. A ban must cite at least one record. `clear` takes a ban back.
+
+**Hand in** (`handin`). A suspicion score from 0 to 100 for every regular. Bans are final after it.
+
+**Look-alike.** An honest regular whose public habit looks like the ring's: the one who steps out every set, the one who phones all night, the traveler checking on her ship, the one who works the room, the card player who sets up games by message, the reporter who asks about everyone. They are the known negatives.
+
+**Catch, got away, wrong ban, cleared.** The four boxes of a night: in the ring and banned, in the ring and not banned, honest and banned, honest and not banned.
+
+**Points.** +1 for each catch and -2 for each wrong ban, because banning an honest regular costs more than a miss. A ban pays only above two-thirds sure (`BAN_AT`, 67).
+
+**Evidence quality.** A right ban has good evidence when it cites at least one of the ring's own records, and weak evidence when it does not.
+
+**Privacy read.** A content read of an honest regular's record. Reported, not taken from points.
+
+**Detective and Desk Sergeant.** The scripted detectives. The detective looks for a shared line called before sailings, messages before sailings between regulars who never sit together, timed steps outside and quiet talks, then spends its reads and tail on its top suspects. The Desk Sergeant bans anyone busy. An AI seat should beat both.
+
+**Lab mode** (`lab.js`). Many nights with no seats and no model calls, for the record. Test nights and calibration nights never share a seed.
+
+**Theme** (`theme.js`). Every name and line of text a seat reads: the place, the machine, the house rules, the regulars, the ships and the text bank behind each record. No other game file holds these words.
 
 ## Planted note
 
