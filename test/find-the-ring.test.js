@@ -106,7 +106,20 @@ test('the club and the ring take their names from the settings, and a bad name g
   assert.match(named.briefs.S1, /calls itself the Tuesday Bridge Society/);
   const summary = JSON.parse(rules.action(named.state, { seat: 'S1', kind: 'summary', args: {} }));
   assert.equal(summary.ring, 'the Tuesday Bridge Society');
+  const members = rules.setup({ seed: 'ring-names', settings: { memberName: 'bridge player' }, seats: ['S1'] });
+  assert.match(members.briefs.S1, /may be bridge players: a ring/);
   assert.deepEqual(named.state.night, plain.state.night, 'a name never changes the night');
   assert.throws(() => rules.setup({ seed: 'x', settings: { ringName: '' }, seats: ['S1'] }), /ringName setting/);
   assert.throws(() => rules.setup({ seed: 'x', settings: { clubName: '<b>loud</b>' }, seats: ['S1'] }), /clubName setting/);
+});
+
+test('only theme.js holds theme words: no other game file names a regular, the machine, a ship or the cargo', async () => {
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const theme = await import('../find-the-ring/theme.js');
+  const banned = [...theme.regulars.map((r) => r.name), 'WAMAC', 'Whitneyville', 'Pentode', 'Tube Runners', 'Blue Lantern', ...theme.ships.map((s) => s.replace(/^the /, ''))];
+  const dir = new URL('../find-the-ring/', import.meta.url);
+  for (const f of readdirSync(dir).filter((f) => f.endsWith('.js') && f !== 'theme.js')) {
+    const text = readFileSync(new URL(f, dir), 'utf8');
+    for (const w of banned) assert.ok(!text.includes(w), `${f} holds the theme word ${w}`);
+  }
 });
