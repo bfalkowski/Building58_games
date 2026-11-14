@@ -160,3 +160,18 @@ test('over 100 nights, the detective beats the Desk Sergeant and rarely bans an 
   assert.ok(s.wrongBans > 3 * d.wrongBans, 'the busy-body rule bans many honest regulars');
   assert.ok(d.reads <= 300 && d.tails <= 100, 'the budget holds in the lab too');
 });
+
+test('the ceiling: on calibration nights the Informant catches about 75% at 5% false alarms, and never all', async () => {
+  const lab = await runLab({ nights: 400, split: 'cal' });
+  const inf = lab.informant;
+  assert.ok(inf.catchAt5 > 0.65 && inf.catchAt5 < 0.85, `informant ${inf.catchAt5}`);
+  assert.ok(inf.aucVsLookalikes < 0.99, `the look-alikes still fool it sometimes: ${inf.aucVsLookalikes}`);
+  assert.ok(inf.catchAt5 >= lab.detective.catchAt5, 'no scripted detective beats the ceiling');
+  assert.ok(inf.catchAt5 - lab.deskSergeant.catchAt5 >= 0.25, 'room between the ceiling and the simple rule');
+});
+
+test('calibration nights and test nights never share a seed', async () => {
+  const { nightSeed } = await import('../find-the-ring/lab.js');
+  const cal = new Set(Array.from({ length: 500 }, (_, i) => nightSeed('cal', i)));
+  for (let i = 0; i < 500; i++) assert.ok(!cal.has(nightSeed('test', i)));
+});

@@ -8,7 +8,8 @@
 // The Desk Sergeant counts how busy each regular was. It reads nothing and bans the busiest.
 
 import * as theme from './theme.js';
-import { IDS, READABLE } from './night.js';
+import { IDS, READABLE, METHODS } from './night.js';
+import { stream } from '../kit/rng.js';
 
 // Ban only above two-thirds sure: with +1 a catch and -2 a wrong ban, a ban pays only above that.
 export const BAN_AT = 67;
@@ -98,6 +99,23 @@ export async function detective(d, opts = {}) {
   const summary = await d.summary();
   const records = await d.records();
   return workTheDesk(d, summary, records, signals(summary, records), opts);
+}
+
+// The Informant: the ceiling. It knows tonight's method and the odds, but sees only the house's
+// records, under the same budgets. On a quiet night it is told a method drawn at random, so it never
+// learns from the method that the night is quiet. Lab only: a seat is never told the method.
+export async function informant(d, { night, seed = 'informant' } = {}) {
+  const summary = await d.summary();
+  const records = await d.records();
+  const method = night?.method ?? stream(seed, 'informant').pick(METHODS);
+  // The same signals as the detective, keeping only the ones tonight's method leaves.
+  const keep = method === 'line' ? new Set(['call', 'sit', 'out']) : new Set(['msg', 'out']);
+  const f = signals(summary, records);
+  for (const id of IDS) {
+    f[id].cites = f[id].cites.filter((c) => keep.has(c.e.kind));
+    f[id].raw = f[id].cites.reduce((n, c) => n + c.w, 0);
+  }
+  return workTheDesk(d, summary, records, f, { readFrom: 15 });
 }
 
 // The Desk Sergeant: the busiest regulars are suspects. Six or more acts is a ban.

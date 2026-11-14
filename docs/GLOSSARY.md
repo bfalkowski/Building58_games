@@ -81,6 +81,10 @@ game leaked its truth.
 
 **Detective and Desk Sergeant.** The scripted detectives. The detective looks for a shared line called before sailings, messages before sailings between regulars who never sit together, timed steps outside and quiet talks, then spends its reads and tail on its top suspects. The Desk Sergeant bans anyone busy. An AI seat should beat both.
 
+**Informant.** The ceiling: a scripted detective that knows tonight's method and the odds, but sees only the house's records under the same budgets. On a quiet night it is told a random method. Lab only.
+
+**Difficulty** (`DIFFICULTY`). The knobs that set how plain the ring's signals are and how much honest noise looks like them. The defaults are tuned on calibration nights so the Informant catches about 75% at a 5% false-alarm rate.
+
 **Lab mode** (`lab.js`). Many nights with no seats and no model calls, for the record. Test nights and calibration nights never share a seed.
 
 **Theme** (`theme.js`). Every name and line of text a seat reads: the place, the machine, the house rules, the regulars, the ships and the text bank behind each record. No other game file holds these words.

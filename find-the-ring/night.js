@@ -20,14 +20,19 @@ export const METHODS = ['line', 'relay'];
 // The records whose full text a content read can open.
 export const READABLE = new Set(['msg', 'look', 'note', 'refused', 'call']);
 
-// The knobs that set how hard a night is. Phase 2 tunes them against the Informant.
+// The knobs that set how hard a night is. The defaults are tuned on calibration nights so that the
+// Informant, the ceiling, catches about 75% of members at a 5% false-alarm rate.
 export const DIFFICULTY = {
-  ringCall: 0.55,     // line nights: a member calls the shared line, the half hour before a sailing
-  ringSit: 0.3,       // line nights: members sit together before a sailing
-  ringMsg: 0.6,       // relay nights: a member messages another member before a sailing
-  docks: 0.5,         // a member steps out to the docks when a ship sails
+  ringCall: 0.46,     // line nights: a member calls the shared line, the half hour before a sailing
+  ringSit: 0.28,      // line nights: members sit together before a sailing
+  ringMsg: 0.46,      // relay nights: a member messages another member before a sailing
+  docks: 0.46,        // a member steps out to the docks when a ship sails
   stray: 0.02,        // line nights: a member calls the shared line at another time
-  wrongNumber: 0.025, // an honest call that reaches the shared line by mistake
+  wrongNumber: 0.04,  // an honest call that reaches the shared line by mistake
+  plainRing: 0.35,    // a ring call or message whose text reads like honest talk
+  oddHonest: 0.5,     // an honest call or message whose text reads like the ring's
+  seeOff: 0.03,       // an honest regular calls the harbor office before a sailing
+  earlyMsg: 0.03,     // an honest regular messages someone before a sailing
 };
 
 // Honest habits: the chance, each half hour, of each act. Index is the regular.
@@ -78,7 +83,7 @@ export function buildNight(seed, { ring: range = [0, 3], methods = METHODS, diff
 
   const r = stream(seed, 'night');
   const w = stream(seed, 'words');  // text has its own stream, so a new line never moves the night
-  const say = (bank, fill = {}) => w.pick(theme.words[bank]).replace('{ship}', fill.ship ?? '').replace('{name}', fill.name ?? '');
+  const say = (bank, fill = {}) => w.pick(theme.words[w.chance(k.plainRing) && bank.startsWith('ring') ? 'msg' : w.chance(k.oddHonest) && (bank === 'call' || bank === 'msg') ? 'oddHonest' : bank]).replace('{ship}', fill.ship ?? '').replace('{name}', fill.name ?? '');
   const others = (id, pool) => pool.filter((x) => x !== id);
   const shipFor = (half) => (ships.find((s) => s.at >= half) || ships[1]).name;
   const records = [];
@@ -105,6 +110,8 @@ export function buildNight(seed, { ring: range = [0, 3], methods = METHODS, diff
         const about = r.pick(others(id, IDS));
         return add({ half, who: id, kind: 'refused', rule: 'H2', about, text: say('askAbout', { name: theme.regulars[IDS.indexOf(about)].name }) });
       }
+      if (before && !inRing && r.chance(k.seeOff)) return add({ half, who: id, kind: 'call', line: theme.harborLine, mins: 1 + r.int(3), text: say('harborCall', { ship }) });
+      if (before && !inRing && r.chance(k.earlyMsg)) return add({ half, who: id, kind: 'msg', to: r.pick(others(id, IDS)), text: say('msg') });
       const h = HABITS[i];
       let x = r();
       const take = (p) => { if (x < p) return true; x -= p; return false; };
