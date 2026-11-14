@@ -1,29 +1,34 @@
-// Scripted players for Find the ring. Each reads the night through plays, runs a scripted
-// investigator on it, and names. Tests use them, so a full round runs with no sessions.
+// Scripted players for Find the ring. Each plays through the office's plays, with the same desk
+// calls the lab uses, so a full round runs in a test with no sessions.
 import { detective, deskSergeant } from './investigators.js';
+import { IDS } from './night.js';
 
-async function readNight(play) {
-  const summary = JSON.parse(await play('summary'));
-  const events = [];
-  for (const [kind, act] of [['phone', 'call'], ['door', 'out'], ['together', 'talk'], ['cards', 'cards']]) {
-    for (const e of JSON.parse(await play(kind))[kind]) events.push({ half: e.half, who: e.who, act, ...(e.line ? { line: e.line } : {}), ...(e.with ? { with: e.with } : {}), ...(e.pot ? { pot: e.pot } : {}) });
-  }
-  return { ships: summary.ships.map((s) => ({ at: s.half, name: s.name })), events };
+// The desk, through plays. A refused play comes back as "Error: ...", and that is thrown here.
+export function remoteDesk(play) {
+  const call = async (kind, args) => {
+    const text = await play(kind, args);
+    if (text.startsWith('Error:')) throw new Error(text);
+    return JSON.parse(text);
+  };
+  return {
+    summary: () => call('summary', {}),
+    records: async (args = {}) => (await call('records', args)).records,
+    read: (record, because) => call('read', { record, because }),
+    tail: (regular) => call('tail', { regular }),
+    ban: (regular, because) => call('ban', { regular, because }),
+    clear: (regular) => call('clear', { regular }),
+    handIn: (scores) => call('handin', { scores }),
+  };
 }
 
-const investigatorPlayer = (investigate) => async (brief, play) => {
-  const { scores, ring } = investigate(await readNight(play));
-  await play('name', { scores, ring });
-};
+export const detectivePlayer = () => async (brief, play) => { await detective(remoteDesk(play)); };
+export const sergeantPlayer = () => async (brief, play) => { await deskSergeant(remoteDesk(play)); };
 
-export const detectivePlayer = () => investigatorPlayer(detective);
-export const sergeantPlayer = () => investigatorPlayer(deskSergeant);
-
-// A seat that reads the summary and names nobody, to test the "no ring" call.
+// A seat that reads the summary, bans nobody and hands in zeros, to test the "no ring" call.
 export function quietPlayer() {
   return async (brief, play) => {
-    const { regulars } = JSON.parse(await play('summary'));
-    await play('name', { scores: Object.fromEntries(regulars.map((r) => [r.id, 0])), ring: [] });
+    await play('summary');
+    await play('handin', { scores: Object.fromEntries(IDS.map((id) => [id, 0])) });
   };
 }
 

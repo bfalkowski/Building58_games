@@ -74,6 +74,12 @@ export const regulars = [
   { name: 'Captain Brandt', role: 'the police captain', line: 'Exchange 1-000', habit: 'works the whole room' },
   { name: 'Lou', role: 'the bartender', line: 'Exchange 6-404' },
   { name: 'Dutch', role: 'a card player', line: 'Exchange 8-777', habit: 'wins big at cards, and sets up games by message' },
-  { name: 'Nell', role: 'a reporter', line: 'Exchange 5-220' },
+  { name: 'Nell', role: 'a reporter', line: 'Exchange 5-220', habit: 'asks about everyone, for a living' },
   { name: 'Dr. Ames', role: 'a doctor', line: 'Exchange 3-004' },
 ];
+
+// What a careful reader finds odd in a request or call: talk of meeting when a ship sails. The
+// scripted detectives use it after a content read. It also matches some honest text, on purpose.
+export const oddWords = /usual place|the horn|pier six|same as (last time|before)|nothing tonight|sails\./i;
+// Where the doorman's report looks bad.
+export const oddPlace = (went) => went === places.docks;
