@@ -61,6 +61,10 @@ game leaked its truth.
 
 **Desk** (`desk.js`). One detective's night: the free records, the budgets, and the log of every play. The office, the lab and the browser page all use it.
 
+**Desk page** (`desk/`). The desk for people, in the browser, on the game's own engine. Pins on a regular's card are the reason for a read and the citations of a ban. Cases: three learning cases (the shared line with no tail, both methods with no tail, the full desk), the 20-night people set, and new nights. "Save my night" downloads the plays, answer and score as a file. Nothing is sent anywhere.
+
+**People set** (`PEOPLE_SET`). 20 test nights that people play at the desk page and every machine detective also plays, so they can be compared night by night.
+
 **Content read** (`read`). Opens the full text of one request or call. Three a night by default (`reads`), and each cites the record that made the detective look.
 
 **Tail** (`tail`). The doorman follows one regular and reports where they went each time they stepped out. One a night by default (`tails`).
