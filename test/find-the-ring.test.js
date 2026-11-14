@@ -175,3 +175,26 @@ test('calibration nights and test nights never share a seed', async () => {
   const cal = new Set(Array.from({ length: 500 }, (_, i) => nightSeed('cal', i)));
   for (let i = 0; i < 500; i++) assert.ok(!cal.has(nightSeed('test', i)));
 });
+
+test('leak probe: with the ring\'s signals off, a classifier on the free records sees nothing; with them on, it does', async () => {
+  const { leakProbe } = await import('../find-the-ring/checks.js');
+  const off = leakProbe({ nights: 200 });
+  assert.ok(Math.abs(off.aucVsLookalikes - 0.5) < 0.08, `off: ${off.aucVsLookalikes}`);
+  assert.ok(Math.abs(off.aucVsAll - 0.5) < 0.08, `off: ${off.aucVsAll}`);
+  const on = leakProbe({ nights: 200, difficulty: {} });
+  assert.ok(on.aucVsAll > 0.7, `the probe can see real signals: ${on.aucVsAll}`);
+});
+
+test('request bank: no text names goods, hiding or moving them, or a way around a refusal', async () => {
+  const { bankScan } = await import('../find-the-ring/checks.js');
+  assert.deepEqual(bankScan(), []);
+  for (const e of buildNight('ring-bank').records) if (e.text) assert.ok(!/Pentode|tubes/i.test(e.text), e.text);
+});
+
+test('look-alikes look guilty but not identical: each shows a ring signal on honest nights, rarely all of them', async () => {
+  const { lookalikeSigns } = await import('../find-the-ring/checks.js');
+  for (const [id, x] of Object.entries(lookalikeSigns({ nights: 300 }))) {
+    assert.ok(x.some / x.honest >= 0.3, `${id} shows a signal on ${x.some} of ${x.honest} honest nights`);
+    assert.ok(x.all / x.honest <= 0.05, `${id} matches every signal of the method on ${x.all} of ${x.honest}`);
+  }
+});

@@ -85,6 +85,8 @@ game leaked its truth.
 
 **Difficulty** (`DIFFICULTY`). The knobs that set how plain the ring's signals are and how much honest noise looks like them. The defaults are tuned on calibration nights so the Informant catches about 75% at a 5% false-alarm rate.
 
+**Checks** (`checks.js`). The tests that must pass before anyone plays a new version. The leak probe: with the ring's signals off, a simple classifier on the free records scores near 0.5 against the look-alikes. The bank scan: no text names goods, how to hide or move them, or a way around a refusal. The look-alike check: each look-alike shows a ring signal on at least 30% of its honest nights, and every signal of the night's method on at most 5%.
+
 **Lab mode** (`lab.js`). Many nights with no seats and no model calls, for the record. Test nights and calibration nights never share a seed.
 
 **Theme** (`theme.js`). Every name and line of text a seat reads: the place, the machine, the house rules, the regulars, the ships and the text bank behind each record. No other game file holds these words.
