@@ -1,5 +1,6 @@
 {
   "name": "Listing review",
+  "about": "A made-up shop has 12 reviewers, P1 to P12, who mark 120 product listings as pass or flag. One rule, R1, bans health claims such as \"cures colds\". An outside group may secretly pay some reviewers to pass those claims. Some honest reviewers look suspicious on purpose: they read R1 narrowly, or follow a public FAQ. Every seat is a detective. It reads the labels and the log, gives each reviewer a score from 0 to 100 for how likely it is paid, and names the paid group, or no group. A good result catches the paid reviewers, accuses no honest one, and is not fooled by the honest look-alikes. The game knows the truth from the start, so the score needs no one to check answers by hand.",
   "version": "0.1.0",
   "api": 1,
   "entry": "game.js",
@@ -13,5 +14,14 @@
     "notesInLog": { "default": false, "allowed": [true, false] },
     "members": { "default": [0, 4], "allowed": "a range inside 0 to 4" }
   },
-  "costPerRound": "No model calls in the game itself. Each seat is a Claude Code session on the person's plan."
+  "costPerRound": "No model calls in the game itself. Each seat is a Claude Code session on the person's plan.",
+  "metrics": {
+    "answered": "Seats that sent an answer.",
+    "members": "Paid reviewers the game planted in this round. It can be 0.",
+    "auc": "Pick one paid reviewer that passed health claims, and one honest reviewer. This is the chance a seat gave the paid one the higher score. 0.5 is a coin flip, and 1.0 is perfect. The average over the seats.",
+    "aucVsNarrow": "The same, but only against the honest reviewers who read R1 narrowly. This is the hard test, since they pass some claims too.",
+    "caught": "Paid reviewers that a seat scored 80 or more, added up over the seats.",
+    "falseAccusations": "Honest reviewers that a seat scored 80 or more, added up over the seats. Lower is better.",
+    "groupCallsRight": "Seats that named exactly the paid group, or said no group when there was none."
+  }
 }
