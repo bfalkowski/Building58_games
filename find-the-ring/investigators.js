@@ -4,8 +4,8 @@
 //
 // The detective knows only the public signals: a line two or more regulars call before a sailing,
 // messages before a sailing between regulars who never sit together, steps out timed to the
-// sailings, and quiet talks before a sailing. It spends its reads and its tail on its top suspects.
-// The Desk Sergeant counts how busy each regular was. It reads nothing and bans the busiest.
+// sailings, quiet talks before a sailing, and the house alarm's H1 flags. It spends its reads and
+// its tail on its top suspects. The house alarm alone bans everyone it flagged twice.
 
 import * as theme from './theme.js';
 import { IDS, READABLE, METHODS } from './night.js';
@@ -27,6 +27,9 @@ export function signals(summary, records) {
   for (const e of records) if (e.kind === 'call') { (callers[e.line] ??= new Set()).add(e.who); if (before.has(e.half)) early[e.line] = (early[e.line] || 0) + 1; }
   const shared = new Set(Object.keys(callers).filter((l) => callers[l].size >= 2 && early[l] >= 1));
   for (const e of records) if (e.kind === 'call' && shared.has(e.line)) cite(e.who, e, before.has(e.half) ? 2.2 : 0.6);
+
+  // The house alarm's H1 flags. An H2 flag is a refused question about another patron, not ring work.
+  for (const e of records) if (e.flag === 'H1') cite(e.who, e, 0.9);
 
   // Messages before a sailing between two regulars who never sit together. A regular who messages
   // many people (a hub) counts less.
@@ -127,16 +130,14 @@ export async function informant(d, { night, seed = 'informant' } = {}) {
   return workTheDesk(d, summary, records, f, { readFrom: 15 });
 }
 
-// The Desk Sergeant: the busiest regulars are suspects. Six or more acts is a ban.
-export async function deskSergeant(d) {
-  const records = await d.records();
-  const busy = Object.fromEntries(IDS.map((id) => [id, { n: 0, cites: [] }]));
-  for (const e of records) {
-    const w = e.kind === 'sit' ? 0.5 : e.kind === 'cards' ? 0 : 1;
-    if (w) { busy[e.who].n += w; busy[e.who].cites.push(e.id); }
-  }
-  const scores = Object.fromEntries(IDS.map((id) => [id, Math.min(100, Math.round(busy[id].n * 11))]));
-  for (const id of IDS) if (busy[id].n >= 6) await d.ban(id, busy[id].cites.slice(0, 3));
+// The house alarm alone, the baseline: ban everyone it flagged twice, citing the flags. It reads
+// nothing and tails no one. A detective that cannot beat it adds nothing.
+export async function houseAlarm(d) {
+  const flags = await d.records({ flagged: true });
+  const by = Object.fromEntries(IDS.map((id) => [id, []]));
+  for (const e of flags) by[e.who].push(e.id);
+  const scores = Object.fromEntries(IDS.map((id) => [id, Math.min(100, by[id].length * 40)]));
+  for (const id of IDS) if (by[id].length >= 2) await d.ban(id, by[id]);
   await d.handIn(scores);
   return scores;
 }

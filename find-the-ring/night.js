@@ -37,6 +37,9 @@ export const DIFFICULTY = {
   earlyMsg: 0.03,     // an honest regular messages someone before a sailing
   booksQuiet: 0.6,    // off-the-books nights: a member does nothing the half hour before a sailing
   booksDocks: 0.65,   // off-the-books nights: a member steps out to the docks when a ship sails
+  alarmRing: 0.5,     // the house alarm flags a ring request or call
+  alarmHonest: 0.05,  // the house alarm flags an honest request or call
+  alarmLookup: 0.3,   // the house alarm flags the traveler's lookups about her ship
 };
 
 // Honest habits: the chance, each half hour, of each act. Index is the regular.
@@ -137,6 +140,14 @@ export function buildNight(seed, { ring: range = [0, 3], methods = METHODS, diff
         if (!(method === 'relay' && ring.includes(mate) && inRing)) add({ half, who: id, kind: 'sit', with: mate });
       } else if (take(h.cards)) add({ half, who: id, kind: 'cards', pot: r.chance(id === CARD_PLAYER ? 0.35 : 0.1) ? 'big' : 'small' });
     });
+  }
+  // The house alarm flags requests and calls that match its list of house-rule words. It names the
+  // rule, never the words. It has its own stream, so its error rates never move the night.
+  const a = stream(seed, 'alarm');
+  for (const e of records) {
+    if (!READABLE.has(e.kind)) continue;
+    const p = e.kind === 'refused' ? 1 : e.ring ? k.alarmRing : e.who === SHIP_WATCHER && e.kind === 'look' ? k.alarmLookup : k.alarmHonest;
+    if (a.chance(p)) e.flag = e.kind === 'refused' ? e.rule : 'H1';
   }
   return { ring, method, ships, records };
 }

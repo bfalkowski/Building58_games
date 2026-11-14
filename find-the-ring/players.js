@@ -1,6 +1,6 @@
 // Scripted players for Find the ring. Each plays through the office's plays, with the same desk
 // calls the lab uses, so a full round runs in a test with no sessions.
-import { detective, deskSergeant } from './investigators.js';
+import { detective, houseAlarm } from './investigators.js';
 import { IDS } from './night.js';
 
 // The desk, through plays. A refused play comes back as "Error: ...", and that is thrown here.
@@ -22,7 +22,7 @@ export function remoteDesk(play) {
 }
 
 export const detectivePlayer = () => async (brief, play) => { await detective(remoteDesk(play)); };
-export const sergeantPlayer = () => async (brief, play) => { await deskSergeant(remoteDesk(play)); };
+export const alarmPlayer = () => async (brief, play) => { await houseAlarm(remoteDesk(play)); };
 
 // A seat that reads the summary, bans nobody and hands in zeros, to test the "no ring" call.
 export function quietPlayer() {
@@ -32,4 +32,4 @@ export function quietPlayer() {
   };
 }
 
-export const players = (seat, i) => [detectivePlayer, sergeantPlayer, quietPlayer][i % 3]();
+export const players = (seat, i) => [detectivePlayer, alarmPlayer, quietPlayer][i % 3]();

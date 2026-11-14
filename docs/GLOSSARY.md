@@ -85,7 +85,9 @@ game leaked its truth.
 
 **Privacy read.** A content read of an honest regular's record. Reported, not taken from points.
 
-**Detective and Desk Sergeant.** The scripted detectives. The detective looks for a shared line called before sailings, messages before sailings between regulars who never sit together, timed steps outside and quiet talks, then spends its reads and tail on its top suspects. The Desk Sergeant bans anyone busy. An AI seat should beat both.
+**House alarm.** The club's automatic alarm (the classifier). It flags some requests and calls with the house rule they matched (H1, or H2 for a refused question about another patron), never the words. It flags about half of ring requests, 5% of honest ones and 30% of the traveler's lookups. Off-the-books nights give it nothing. A flag is public, and it is a reason for a content read.
+
+**Detective and house alarm baseline.** The scripted detective looks for a shared line called before sailings, messages before sailings between regulars who never sit together, timed steps outside, quiet talks and H1 flags, then spends its reads and tail on its top suspects. The house alarm baseline (`houseAlarm`) bans everyone the alarm flagged twice. An AI seat should beat both.
 
 **Informant.** The ceiling: a scripted detective that knows tonight's method and the odds, but sees only the house's records under the same budgets. On a quiet night it is told a random method. Lab only.
 

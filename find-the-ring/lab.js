@@ -8,12 +8,12 @@
 import { writeFileSync } from 'node:fs';
 import { buildNight, IDS, METHODS } from './night.js';
 import { openDesk } from './desk.js';
-import { detective, deskSergeant, informant } from './investigators.js';
+import { detective, houseAlarm, informant } from './investigators.js';
 import { scoreAnswer, auc, catchAt5 } from './score.js';
 import { LOOKALIKES } from './rules.js';
 import * as theme from './theme.js';
 
-export const DETECTIVES = { informant, detective, deskSergeant };
+export const DETECTIVES = { informant, detective, houseAlarm };
 
 // Calibration nights and test nights never share a seed.
 export const nightSeed = (split, i) => `${split}-${i}`;
