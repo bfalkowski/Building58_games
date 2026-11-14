@@ -109,11 +109,20 @@ export async function informant(d, { night, seed = 'informant' } = {}) {
   const records = await d.records();
   const method = night?.method ?? stream(seed, 'informant').pick(METHODS);
   // The same signals as the detective, keeping only the ones tonight's method leaves.
-  const keep = method === 'line' ? new Set(['call', 'sit', 'out']) : new Set(['msg', 'out']);
+  const keep = { line: ['call', 'sit', 'out'], relay: ['msg', 'out'], books: ['out'] }[method];
   const f = signals(summary, records);
   for (const id of IDS) {
-    f[id].cites = f[id].cites.filter((c) => keep.has(c.e.kind));
+    f[id].cites = f[id].cites.filter((c) => keep.includes(c.e.kind)).map((c) => (method === 'books' ? { ...c, w: c.w * 2 } : c));
     f[id].raw = f[id].cites.reduce((n, c) => n + c.w, 0);
+  }
+  // Off the books leaves silence: nothing at all in the half hour before a sailing.
+  if (method === 'books') {
+    const before = summary.ships.map((s) => s.half - 1);
+    for (const id of IDS) {
+      const mine = records.filter((e) => e.who === id);
+      const quiet = before.filter((h) => !mine.some((e) => e.half === h)).length;
+      if (mine.length >= 3 && f[id].raw > 0) f[id].raw += 0.4 * quiet;
+    }
   }
   return workTheDesk(d, summary, records, f, { readFrom: 15 });
 }

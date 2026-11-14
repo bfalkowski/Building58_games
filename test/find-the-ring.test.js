@@ -40,11 +40,11 @@ test('the same seed builds the same night, with the same record ids', () => {
   assert.deepEqual(n.records.map((e) => e.id), n.records.map((_, i) => `E${i + 1}`));
 });
 
-test('across seeds: quiet nights, rings of two and three, never one, and both methods', () => {
+test('across seeds: quiet nights, rings of two and three, never one, and every method', () => {
   const sizes = new Set(), methods = new Set();
   for (let i = 0; i < 80; i++) { const n = buildNight(`ring-mix-${i}`); sizes.add(n.ring.length); if (n.method) methods.add(n.method); }
   assert.ok(sizes.has(0) && sizes.has(2) && sizes.has(3) && !sizes.has(1), [...sizes].join());
-  assert.deepEqual([...methods].sort(), ['line', 'relay']);
+  assert.deepEqual([...methods].sort(), ['books', 'line', 'relay']);
   for (let i = 0; i < 20; i++) assert.equal(buildNight(`ring-none-${i}`, { ring: [0, 0] }).ring.length, 0);
 });
 
@@ -241,4 +241,16 @@ test('the people set is 20 test nights, and the lab can play just those', async 
   assert.ok(PEOPLE_SET.every((s) => s.startsWith('test-')));
   const lab = await runLab({ seeds: PEOPLE_SET.slice(0, 3) });
   assert.equal(lab.nights, 3);
+});
+
+test('off the books is real: some members leave no record of the ring at all, and the lab reports the findable share', async () => {
+  let members = 0, traceless = 0;
+  for (let i = 0; i < 300; i++) {
+    const n = buildNight(`ring-books-${i}`, { methods: ['books'] });
+    assert.ok(!n.records.some((e) => e.ring && e.kind !== 'out'), 'off the books uses no service');
+    for (const id of n.ring) { members++; if (!n.records.some((e) => e.ring && e.who === id)) traceless++; }
+  }
+  assert.ok(traceless > 0 && traceless < members / 2, `${traceless} of ${members} left no trace`);
+  const lab = await runLab({ nights: 60, split: 'unit' });
+  assert.ok(lab.findableShare > 0.8 && lab.findableShare < 1, `findable share ${lab.findableShare}`);
 });

@@ -12,7 +12,7 @@ import { buildNight, IDS, publicRecord } from './night.js';
 import { auc } from './score.js';
 
 // Every ring signal off: members act on their honest habits only.
-export const SIGNALS_OFF = { ringCall: 0, ringSit: 0, ringMsg: 0, docks: 0, stray: 0 };
+export const SIGNALS_OFF = { ringCall: 0, ringSit: 0, ringMsg: 0, docks: 0, stray: 0, booksQuiet: 0, booksDocks: 0 };
 const KINDS = ['call', 'msg', 'look', 'note', 'refused', 'out', 'sit', 'cards'];
 
 // Raw features of one regular from the free records: counts of each kind, at each time, and size.
@@ -89,9 +89,10 @@ export function signsOf(night, id) {
     quietMsg: mine.some((e) => e.kind === 'msg' && before.has(e.half) && !sat.has([e.who, e.to].sort().join())),
     outAtSailing: mine.some((e) => e.kind === 'out' && sailing.has(e.half)),
     sitBefore: mine.some((e) => e.kind === 'sit' && before.has(e.half)),
+    quietBefore: mine.length >= 3 && !mine.some((e) => before.has(e.half)),
   };
 }
-const METHOD_SIGNS = { line: ['sharedCall', 'outAtSailing', 'sitBefore'], relay: ['quietMsg', 'outAtSailing'] };
+const METHOD_SIGNS = { line: ['sharedCall', 'outAtSailing', 'sitBefore'], relay: ['quietMsg', 'outAtSailing'], books: ['outAtSailing', 'quietBefore'] };
 
 export function lookalikeSigns({ nights = 300 } = {}) {
   const out = Object.fromEntries(LOOKALIKES.map((id) => [id, { honest: 0, some: 0, all: 0 }]));

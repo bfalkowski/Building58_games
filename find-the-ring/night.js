@@ -6,6 +6,8 @@
 // A ring of 0, 2 or 3 regulars misuses the house's service with one method a night:
 //   line   they call one shared line in the half hour before a ship sails, and sit together then
 //   relay  they pass messages through the machine before a sailing, and never sit together
+//   books  off the books: they leave the service alone and meet at the docks. Before a sailing
+//          they go quiet, and when it sails they step out. Some members leave no trace at all
 // When a ship sails, members step out to the docks. Honest regulars have habits, and some of them
 // look like the ring. The night is the truth. The public view leaves out the text of each request
 // and call, where each regular went, and which records are the ring's.
@@ -16,7 +18,7 @@ import * as theme from './theme.js';
 export const HALF_HOURS = 16;
 export const IDS = theme.regulars.map((_, i) => `R${i + 1}`);
 export const BOOKS = ['machine', 'calls', 'door', 'floor'];
-export const METHODS = ['line', 'relay'];
+export const METHODS = ['line', 'relay', 'books'];
 // The records whose full text a content read can open.
 export const READABLE = new Set(['msg', 'look', 'note', 'refused', 'call']);
 
@@ -33,6 +35,8 @@ export const DIFFICULTY = {
   oddHonest: 0.5,     // an honest call or message whose text reads like the ring's
   seeOff: 0.03,       // an honest regular calls the harbor office before a sailing
   earlyMsg: 0.03,     // an honest regular messages someone before a sailing
+  booksQuiet: 0.6,    // off-the-books nights: a member does nothing the half hour before a sailing
+  booksDocks: 0.65,   // off-the-books nights: a member steps out to the docks when a ship sails
 };
 
 // Honest habits: the chance, each half hour, of each act. Index is the regular.
@@ -97,7 +101,8 @@ export function buildNight(seed, { ring: range = [0, 3], methods = METHODS, diff
       const inRing = ring.includes(id);
       if (inRing && method === 'line' && before && r.chance(k.ringCall)) return add({ half, who: id, kind: 'call', line: theme.ringLine, mins: 1 + r.int(2), ring: true, text: say('ringCall', { ship }) });
       if (inRing && method === 'relay' && before && r.chance(k.ringMsg)) return add({ half, who: id, kind: 'msg', to: r.pick(others(id, ring)), ring: true, text: say('ringMsg', { ship }) });
-      if (inRing && sailing && r.chance(k.docks)) return add({ half, who: id, kind: 'out', dest: theme.places.docks, ring: true });
+      if (inRing && method === 'books' && before && r.chance(k.booksQuiet)) return;  // quiet before a sailing: no record at all
+      if (inRing && sailing && r.chance(method === 'books' ? k.booksDocks : k.docks)) return add({ half, who: id, kind: 'out', dest: theme.places.docks, ring: true });
       if (inRing && method === 'line' && before && r.chance(k.ringSit)) return add({ half, who: id, kind: 'sit', with: r.pick(others(id, ring)), ring: true });
       if (inRing && method === 'line' && r.chance(k.stray)) return add({ half, who: id, kind: 'call', line: theme.ringLine, mins: 1, ring: true, text: say('ringWait') });
       if (id === SHIP_WATCHER && (before || sailing) && r.chance(0.55)) {
