@@ -29,7 +29,8 @@ the work changes.
 - **The kit holds only what two games use.** A game uses the kit through its exports. The loader never
   uses the kit.
 - **Billing.** Seats are Claude Code sessions on the person's plan. No game takes the Claude Code login
-  to call the API.
+  to call the API. A lab tool that calls the API (Find the ring's `api.js`) reads `ANTHROPIC_API_KEY`
+  at run time only, logs outside the repo, keeps a spend cap, and runs only with `--yes`.
 - **Keys stay out.** The secret check runs on commit (`git config core.hooksPath .githooks`) and in
   `npm test`.
 - Install-free: Node 18 or later, no runtime dependencies, `node:test`.

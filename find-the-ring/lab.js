@@ -2,7 +2,9 @@
 // Lab mode: many nights with no office, no seats and no model calls. Each detective works every
 // night at its own desk, under the same budgets as a seat, and the record prints. Nights are built
 // from seeds in memory and nothing is written to disk unless --out is given.
-// Usage: node find-the-ring/lab.js [--nights 200] [--split test|cal] [--json] [--out file.json]
+// Usage: node find-the-ring/lab.js [--nights 200] [--split test|cal] [--people] [--json] [--out file.json]
+// The API detective spends money: add --api [--model claude-sonnet-5-5] [--cap 5] --yes. Without
+// --yes it prints the estimate and stops.
 import { writeFileSync } from 'node:fs';
 import { buildNight, IDS, METHODS } from './night.js';
 import { openDesk } from './desk.js';
@@ -15,8 +17,12 @@ export const DETECTIVES = { informant, detective, deskSergeant };
 
 // Calibration nights and test nights never share a seed.
 export const nightSeed = (split, i) => `${split}-${i}`;
+// The people set: 20 test nights that people play in case file mode. Every machine detective plays
+// them too, so people and machines can be compared night by night.
+export const PEOPLE_SET = Array.from({ length: 20 }, (_, i) => nightSeed('test', i * 10));
 
-export async function runLab({ nights = 200, split = 'test', detectives = DETECTIVES, night: build = {}, keepLogs = false } = {}) {
+export async function runLab({ nights = 200, split = 'test', seeds = null, detectives = DETECTIVES, night: build = {}, keepLogs = false } = {}) {
+  if (seeds) nights = seeds.length;
   const res = {};
   for (const k of Object.keys(detectives)) {
     res[k] = {
@@ -28,7 +34,7 @@ export async function runLab({ nights = 200, split = 'test', detectives = DETECT
     };
   }
   for (let i = 0; i < nights; i++) {
-    const seed = nightSeed(split, i);
+    const seed = seeds ? seeds[i] : nightSeed(split, i);
     const night = buildNight(seed, build);
     for (const [k, work] of Object.entries(detectives)) {
       const desk = openDesk(night);
@@ -62,7 +68,8 @@ export function report(lab) {
   const pct = (x) => `${Math.round(100 * x)}%`;
   const lines = [];
   for (const [k, a] of Object.entries(lab)) {
-    if (typeof a !== 'object') continue;
+    if (k === 'apiSpend') { lines.push('', `API spend: $${a.usd.toFixed(2)} over ${a.nights} nights, ${a.noHandIn} never handed in`); continue; }
+    if (typeof a !== 'object' || a === null) continue;
     lines.push('', `${k}, ${lab.nights} ${lab.split} nights`);
     lines.push(`  caught ${a.caught} of ${a.caught + a.gotAway} (${pct(a.catchRate)}), wrong bans ${a.wrongBans} of ${a.wrongBans + a.cleared} honest (${pct(a.wrongRate)}), points ${a.points}`);
     lines.push(`  quiet nights called right ${a.quietRight} of ${a.quiet}. AUC ${a.auc.toFixed(2)}, against look-alikes ${a.aucVsLookalikes.toFixed(2)}, catch rate at 5% false alarms ${pct(a.catchAt5)}`);
@@ -77,7 +84,21 @@ const isMain = process.argv[1] && import.meta.url === new URL(`file://${process.
 if (isMain) {
   const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
   const out = arg('out', null);
-  const lab = await runLab({ nights: Number(arg('nights', 200)), split: arg('split', 'test'), keepLogs: Boolean(out) });
+  const seeds = process.argv.includes('--people') ? PEOPLE_SET : null;
+  const nights = seeds ? seeds.length : Number(arg('nights', 200));
+  let detectives = DETECTIVES, api = null;
+  if (process.argv.includes('--api')) {
+    const model = arg('model', 'claude-opus-5-5'), cap = Number(arg('cap', 5));
+    if (!process.argv.includes('--yes')) {
+      console.log(`The API detective would play ${nights} nights on ${model}, at an estimated $0.10 to $0.20 a night, with a cap of $${cap}. Add --yes to run it.`);
+      process.exit(0);
+    }
+    const { apiDetective } = await import('./api.js');
+    api = apiDetective({ model, capUsd: cap });
+    detectives = { ...DETECTIVES, api };
+  }
+  const lab = await runLab({ nights, split: arg('split', 'test'), seeds, detectives, keepLogs: Boolean(out) });
+  if (api) lab.apiSpend = api.spend;
   if (out) writeFileSync(out, JSON.stringify(lab, null, 1));
   console.log(process.argv.includes('--json') ? JSON.stringify(lab, null, 1) : report(lab));
 }

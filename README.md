@@ -9,6 +9,8 @@ Every commit runs a secret check (`.githooks`, turned on with `git config core.h
     npm test               every test, with the conformance check for each game
     npm run conformance    the conformance check alone
     node find-the-ring/lab.js --nights 200    Find the ring's scripted detectives over many nights, no seats
+    node find-the-ring/lab.js --people --api  The API detective on the 20-night people set (costs money: prints
+                                              the estimate, and runs only with --yes)
 
 To play one in the office, start the relay with `GAMES_REPO` set to this folder. See
 [docs/protocol.md](docs/protocol.md) for what a game and the office say to each other, and

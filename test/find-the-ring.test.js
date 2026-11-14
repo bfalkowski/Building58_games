@@ -198,3 +198,47 @@ test('look-alikes look guilty but not identical: each shows a ring signal on hon
     assert.ok(x.all / x.honest <= 0.05, `${id} matches every signal of the method on ${x.all} of ${x.honest}`);
   }
 });
+
+test('the API detective works the desk through tools, gets refusals as errors, and keeps the key out of its log', async () => {
+  const { apiDetective, TOOLS, systemFor } = await import('../find-the-ring/api.js');
+  const { mkdtempSync, readdirSync: ls, readFileSync: read } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  assert.throws(() => apiDetective({ apiKey: '' }), /ANTHROPIC_API_KEY/);
+  assert.deepEqual(TOOLS.map((t) => t.name), rules.kinds);
+  assert.ok(!systemFor(theme.names).includes('OFFICE_PLAY'));
+  const logDir = mkdtempSync(join(tmpdir(), 'ring-api-'));
+  const turns = [
+    [{ type: 'tool_use', id: 't1', name: 'summary', input: {} }, { type: 'tool_use', id: 't2', name: 'records', input: { book: 'calls' } }],
+    [{ type: 'tool_use', id: 't3', name: 'ban', input: { regular: 'R1', because: [] } }],
+    [{ type: 'tool_use', id: 't4', name: 'handin', input: { scores: Object.fromEntries(IDS.map((id) => [id, 1])) } }],
+    [{ type: 'text', text: 'Done.' }],
+  ];
+  const seen = [];
+  const fakeFetch = async (url, req) => {
+    const body = JSON.parse(req.body);
+    seen.push(body);
+    return { ok: true, status: 200, json: async () => ({ content: turns[seen.length - 1], stop_reason: 'tool_use', usage: { input_tokens: 1000, output_tokens: 100 } }) };
+  };
+  const stand = ['stand', 'in', 'value', 123].join('-');  // made at run time, so the secret check sees no literal
+  const work = apiDetective({ apiKey: stand, fetch: fakeFetch, logDir, model: 'claude-sonnet-5-5' });
+  const desk = openDesk(buildNight('ring-api'));
+  await work(desk);
+  assert.equal(seen.length, 3, 'it stops once the detective hands in');
+  const lastUser = seen[2].messages.at(-1).content[0];
+  assert.equal(lastUser.is_error, true);
+  assert.match(lastUser.content, /cite at least one/);
+  assert.equal(seen[0].thinking.type, 'adaptive');
+  assert.ok(desk.answer());
+  assert.ok(Math.abs(work.spend.usd - 3 * (1000 * 2 + 100 * 10) / 1e6) < 1e-9);
+  const log = ls(logDir).map((f) => read(join(logDir, f), 'utf8')).join('');
+  assert.ok(log.length > 0 && !log.includes(stand));
+});
+
+test('the people set is 20 test nights, and the lab can play just those', async () => {
+  const { PEOPLE_SET } = await import('../find-the-ring/lab.js');
+  assert.equal(PEOPLE_SET.length, 20);
+  assert.ok(PEOPLE_SET.every((s) => s.startsWith('test-')));
+  const lab = await runLab({ seeds: PEOPLE_SET.slice(0, 3) });
+  assert.equal(lab.nights, 3);
+});
