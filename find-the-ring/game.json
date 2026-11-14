@@ -1,0 +1,26 @@
+{
+  "name": "Find the ring",
+  "version": "0.1.0",
+  "api": 1,
+  "entry": "game.js",
+  "players": { "min": 1, "max": 4 },
+  "needs": ["privateBriefs", "ask"],
+  "roles": [{ "name": "detective", "count": "every seat", "secret": false }],
+  "settings": {
+    "ring": { "default": [0, 3], "allowed": "a range inside 0 to 3: how many regulars the ring can have. A ring of one never happens" },
+    "clubName": { "default": "the Blue Lantern", "allowed": "plain text, 1 to 60 characters: what the club is called" },
+    "ringName": { "default": "the Tube Runners Social Club", "allowed": "plain text, 1 to 60 characters: what the ring calls itself" }
+  },
+  "about": "One night in a 1948 nightclub. Twelve regulars, two ships, and maybe a ring of two or three who work together. Each seat is a detective: it reads the phone log, the door book and who sat with whom, scores every regular from 0 to 100, and names the ring or nobody. Some honest regulars have habits that look like the ring's.",
+  "metrics": {
+    "answered": "Seats that named.",
+    "ringSize": "How many regulars were in the ring. 0 means a quiet night.",
+    "caught": "Ring members named, over all seats.",
+    "gotAway": "Ring members not named, over all seats.",
+    "wrongMen": "Honest regulars named, over all seats. The costly mistake.",
+    "points": "Each catch is +1 and each wrong man is -2, over all seats.",
+    "auc": "Pick one ring member and one honest regular: how often the ring member scored higher. 0.5 is a coin flip, 1 is perfect.",
+    "aucVsLookalikes": "The same, against only the honest regulars whose habits look like the ring's. The hard test."
+  },
+  "costPerRound": "No model calls in the game itself. Each seat is a Claude Code session on the person's plan."
+}
