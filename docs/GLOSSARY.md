@@ -53,7 +53,9 @@ game leaked its truth.
 
 **Ring.** Two or three regulars who misuse the club's service together. The name the ring calls itself is a round setting (`ringName`), as are the club's name (`clubName`) and the word for one member (`memberName`). A night has no ring a fifth of the time. A ring of one never happens.
 
-**Method.** How the ring works on one night. `line`: members call one shared line before a ship sails, and sit together. `relay`: members pass messages through the machine before a sailing, and never sit together.
+**Method.** How the ring works on one night. `line`: members call one shared line before a ship sails, and sit together. `relay`: members pass messages through the machine before a sailing, and never sit together. `books` (off the books): members leave the service alone, go quiet before a sailing and step out to the docks when it sails. Some leave no trace at all.
+
+**Findable share.** The share of members with at least one of the ring's own records tonight. A member with none left no trace in the house's records. The lab reports each detective's catch rate among the findable too.
 
 **Ship.** Two ships sail each night. The ring's business clusters around the sailings.
 
